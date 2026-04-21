@@ -1,0 +1,105 @@
+# =====================================
+# ROOT FULLSTACK PROJECT
+# product-management
+# =====================================
+
+# =====================================
+# ENV FILES
+# =====================================
+.env
+.env.*
+!.env.example
+
+product-management-api/.env
+product-management-api/.env.*
+!product-management-api/.env.example
+
+product-management-web/.env
+product-management-web/.env.*
+!product-management-web/.env.example
+
+# =====================================
+# BACKEND - JAVA / GRADLE / QUARKUS
+# =====================================
+product-management-api/.gradle/
+product-management-api/build/
+product-management-api/bin/
+product-management-api/target/
+product-management-api/out/
+product-management-api/.quarkus/
+
+# Keep wrapper jar
+!product-management-api/gradle/wrapper/gradle-wrapper.jar
+
+# Java compiled
+*.class
+*.jar
+*.war
+
+# =====================================
+# FRONTEND - NODE / VITE / PNPM
+# =====================================
+product-management-web/node_modules/
+product-management-web/dist/
+product-management-web/build/
+product-management-web/.vite/
+
+# pnpm/npm logs
+pnpm-debug.log*
+npm-debug.log*
+yarn-error.log*
+
+# =====================================
+# LOGS
+# =====================================
+*.log
+
+# =====================================
+# IDES
+# =====================================
+
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+
+# NetBeans
+**/nb-cache/
+**/.nb-gradle/
+nbproject/private/
+nbdist/
+
+# VSCode
+.vscode/
+!.vscode/settings.json
+
+# =====================================
+# SYSTEM FILES
+# =====================================
+.DS_Store
+Thumbs.db
+
+# =====================================
+# TEMP
+# =====================================
+*.tmp
+*.temp
+*.ser
+coverage/
+tmp/
+temp/
+
+# =====================================
+# MEDIA LARGE FILES (optional)
+# =====================================
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.tiff

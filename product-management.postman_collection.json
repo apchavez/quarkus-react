@@ -1,0 +1,136 @@
+{
+  "info": {
+    "name": "Product Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Create Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sku\": \"SKU-001\",\n  \"name\": \"Laptop Pro\",\n  \"description\": \"High performance laptop\",\n  \"category\": \"Technology\",\n  \"price\": 14999.99,\n  \"stock\": 10,\n  \"active\": true\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/products",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "products"]
+        }
+      }
+    },
+    {
+      "name": "02 - Find All Products",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{url}}/api/v1/products?page=0&size=10",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "products"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "03 - Find Product By ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{url}}/api/v1/products/{{id}}",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "products", "{{id}}"]
+        }
+      }
+    },
+    {
+      "name": "04 - Update Product",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sku\": \"SKU-001\",\n  \"name\": \"Laptop Pro Updated\",\n  \"description\": \"Updated version\",\n  \"category\": \"Technology\",\n  \"price\": 15999.99,\n  \"stock\": 15,\n  \"active\": true\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/products/{{id}}",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "products", "{{id}}"]
+        }
+      }
+    },
+    {
+      "name": "05 - Delete Product",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{url}}/api/v1/products/{{id}}",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "products", "{{id}}"]
+        }
+      }
+    },
+    {
+      "name": "06 - Find By SKU",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{url}}/api/v1/products/sku/SKU-001",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "products", "sku", "SKU-001"]
+        }
+      }
+    },
+    {
+      "name": "07 - Search By Prefix",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{url}}/api/v1/products/search?prefix=Lap",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "products", "search"],
+          "query": [
+            {
+              "key": "prefix",
+              "value": "Lap"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "08 - Health Check",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{url}}/api/v1/q/health",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "q", "health"]
+        }
+      }
+    }
+  ]
+}
