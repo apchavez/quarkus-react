@@ -103,3 +103,7 @@ temp/
 *.wmv
 *.flv
 *.tiff
+
+# Docker / Kubernetes local artifacts
+*.tar
+product-management-api/product-api.yaml
