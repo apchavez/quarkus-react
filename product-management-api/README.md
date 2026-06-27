@@ -113,7 +113,7 @@ cd product-management-api
 
 Requiere MongoDB corriendo en `localhost:27017`. Genera reporte de cobertura en `build/jacoco-report/`.
 
-Coverage verificado con JaCoCo: umbral actual ≥ 70% de líneas (LINE). Objetivo del portafolio: ≥ 80% expandiendo los tests de integración.
+Coverage verificado con JaCoCo: mínimo ≥ 80% de líneas (LINE). Cobertura actual ≈ 87%.
 
 ---
 

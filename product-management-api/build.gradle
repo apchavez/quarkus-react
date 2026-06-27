@@ -80,12 +80,11 @@ tasks.named('jacocoTestCoverageVerification') {
     executionData fileTree(layout.buildDirectory).include('jacoco/test.exec', 'jacoco-quarkus.exec')
     violationRules {
         rule {
-            // Current: LINE ~74%, INSTRUCTION ~55%. Target: 80% (expand tests to reach it).
             element = 'BUNDLE'
             limit {
                 counter = 'LINE'
                 value   = 'COVEREDRATIO'
-                minimum = 0.70
+                minimum = 0.80
             }
         }
     }

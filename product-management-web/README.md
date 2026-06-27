@@ -94,7 +94,7 @@ pnpm test:watch     # modo watch
 - `ProductForm.test.tsx` — 10 tests: validación, envío, modo edición, revalidación en tiempo real
 - `ProductsTable.test.tsx` — 6 tests: renderizado, lista vacía, callbacks de editar/eliminar
 
-Coverage actual (Vitest v8): ~66% statements, ~75% branches, ~54% functions. Los archivos `App.tsx`, `main.tsx`, `routes.tsx` y `productsApi.ts` no tienen tests unitarios todavía. Objetivo del portafolio: ≥ 80% con tests de integración adicionales.
+Coverage actual (Vitest v8): ~66% statements, ~75% branches, ~54% functions. Thresholds configurados en `vite.config.ts` (statements 60%, branches 70%, functions 50%). Los archivos `App.tsx`, `main.tsx`, `routes.tsx` y `productsApi.ts` no tienen tests unitarios — pendiente para escalar a ≥ 80%.
 
 ---
 

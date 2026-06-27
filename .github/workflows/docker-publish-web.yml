@@ -44,6 +44,10 @@ jobs:
         working-directory: product-management-web
         run: pnpm test
 
+      - name: Coverage
+        working-directory: product-management-web
+        run: pnpm test:coverage
+
       - name: Build
         working-directory: product-management-web
         run: pnpm build

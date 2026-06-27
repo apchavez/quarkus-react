@@ -353,4 +353,33 @@ class ProductResourceTest {
             .statusCode(400)
             .body("code", equalTo(400));
     }
+
+    // ─── JSON deserialization errors ──────────────────────────────────────────
+
+    @Test
+    void createProduct_malformedJson_returns400() {
+        given()
+            .contentType(ContentType.JSON)
+            .body("{not valid json}")
+        .when()
+            .post(BASE)
+        .then()
+            .statusCode(400)
+            .body("code", equalTo(400));
+    }
+
+    @Test
+    void createProduct_invalidFieldType_returns400() {
+        String body = """
+                {"sku":"SKU-001","name":"Test","category":"Tech","price":"not-a-number","stock":1,"active":true}
+                """;
+        given()
+            .contentType(ContentType.JSON)
+            .body(body)
+        .when()
+            .post(BASE)
+        .then()
+            .statusCode(400)
+            .body("code", equalTo(400));
+    }
 }

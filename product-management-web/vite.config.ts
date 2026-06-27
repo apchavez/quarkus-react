@@ -30,8 +30,6 @@ export default defineConfig(({ mode }) => {
       coverage: {
         provider: 'v8',
         reporter: ['text', 'html'],
-        // Current: statements ~66%, branches ~75%, functions ~54%, lines ~66%.
-        // Target: 80% once App/main/routes/api files are covered.
         thresholds: {
           lines: 60,
           functions: 50,
