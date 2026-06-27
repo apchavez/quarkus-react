@@ -72,31 +72,34 @@ REDIS_URL=redis://localhost:6379
 
 ## Ejecutar en local
 
-### 1. Dependencias (Docker)
+### Opción A — Docker Compose (stack completo)
 
 ```bash
+docker compose up --build
+```
+
+Levanta mongo, redis, backend y frontend. Disponible en `http://localhost`.
+
+> El gateway nginx enruta `/api/v1` → backend y `/` → frontend, igual que el Ingress de K8s.
+
+### Opción B — Desarrollo con hot-reload
+
+```bash
+# 1. Infraestructura
 docker run -d --name mongo -p 27017:27017 mongo:7.0
 docker run -d --name redis -p 6379:6379 redis:7
-```
 
-### 2. Backend
-
-```bash
+# 2. Backend (hot-reload)
 cd product-management-api
 ./gradlew quarkusDev
-```
 
-Disponible en `http://localhost:8080`
-
-### 3. Frontend
-
-```bash
+# 3. Frontend (hot-reload, en otra terminal)
 cd product-management-web
 pnpm install
 pnpm dev
 ```
 
-Disponible en `http://localhost:5173` (proxy de `/api/v1` al backend configurado en `vite.config.ts`)
+Backend en `http://localhost:8080` · Frontend en `http://localhost:5173`
 
 ---
 
@@ -156,6 +159,17 @@ Requiere MongoDB corriendo en `localhost:27017`. Genera reporte de cobertura en 
   "active": true
 }
 ```
+
+---
+
+## OpenAPI / Swagger UI
+
+Con el proyecto corriendo, disponible en:
+
+| Recurso | URL |
+|---|---|
+| Especificación OpenAPI (JSON) | `http://localhost:8080/api/v1/q/openapi` |
+| Swagger UI | `http://localhost:8080/api/v1/q/swagger-ui` |
 
 ---
 

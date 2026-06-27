@@ -38,6 +38,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-cache'
     implementation 'io.quarkus:quarkus-hibernate-validator'
     implementation 'io.quarkus:quarkus-smallrye-health'
+    implementation 'io.quarkus:quarkus-smallrye-openapi'
     implementation 'io.quarkus:quarkus-resteasy-client-mutiny'
     implementation 'io.smallrye.reactive:smallrye-mutiny-vertx-web-client'
     implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.2.0'
