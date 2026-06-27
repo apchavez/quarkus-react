@@ -7,6 +7,5 @@ metadata:
 data:
   APP_ENVIRONMENT: production
   PORT: "8080"
-  MONGODB_CONNECTION_STRING: mongodb://mongo-service:27017
   MONGODB_DATABASE: products
   REDIS_URL: redis://redis-service:6379

@@ -193,11 +193,19 @@ docker build -t product-web .
 
 Los manifests están en `k8s/`. Aplicar en orden:
 
+> **Paso previo:** crear el secret con credenciales reales antes de aplicar los manifests:
+> ```bash
+> kubectl create secret generic mongo-secret \
+>   --from-literal=MONGO_USERNAME=<user> \
+>   --from-literal=MONGO_PASSWORD=<password> \
+>   --from-literal=MONGODB_CONNECTION_STRING=mongodb://<user>:<password>@mongo-service:27017
+> ```
+
 ```bash
 kubectl apply -f k8s/issuer.yaml
-kubectl apply -f k8s/mongo.yaml
-kubectl apply -f k8s/secret.yaml       # completar credenciales primero
+kubectl apply -f k8s/secret.yaml
 kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/mongo.yaml
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 kubectl apply -f k8s/web-deployment.yaml
@@ -211,10 +219,3 @@ El Ingress expone todo bajo `product.local`:
 product.local/          →  product-web  (React SPA)
 product.local/api/v1    →  product-api  (Quarkus REST)
 ```
-
-> Para el secret de MongoDB crear manualmente:
-> ```bash
-> kubectl create secret generic mongo-secret \
->   --from-literal=MONGO_USERNAME=<user> \
->   --from-literal=MONGO_PASSWORD=<password>
-> ```
