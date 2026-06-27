@@ -11,7 +11,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
 
-import java.util.Collections;
 import java.util.List;
 
 @ApplicationScoped
@@ -63,7 +62,9 @@ public class MongoProductRepository implements PanacheMongoRepository<Product> {
 
     @CacheResult(cacheName = "products-search-cache")
     public List<Product> findByNamePrefix(String namePrefix) {
-        return find("name like ?1", namePrefix + "%").list();
+        // Escape PCRE metacharacters before embedding in the regex anchor
+        String escaped = namePrefix.replaceAll("[.+*?^${}()|\\[\\]\\\\]", "\\\\$0");
+        return find("{'name': {$regex: ?1, $options: 'i'}}", "^" + escaped).list();
     }
 
     @CacheResult(cacheName = "product-cache")

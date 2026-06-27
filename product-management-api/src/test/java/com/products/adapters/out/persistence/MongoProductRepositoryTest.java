@@ -158,4 +158,31 @@ class MongoProductRepositoryTest {
         assertThat(paged.data()).isNotEmpty();
         assertThat(paged.totalItems()).isGreaterThan(0);
     }
+
+    @Test
+    void testFindByNamePrefix_ReturnsMatchingProducts() {
+        Product product = new Product();
+        product.id = new ObjectId();
+        product.sku = "SKU-PREFIX-001";
+        product.name = "Laptop Pro Max";
+        product.description = "Prefix search test";
+        product.category = "Technology";
+        product.price = 50.0;
+        product.stock = 5;
+        product.active = true;
+        product.create("TEST");
+
+        repository.insert(product);
+
+        var results = repository.findByNamePrefix("Laptop");
+
+        assertThat(results).isNotEmpty();
+        assertThat(results.get(0).name).startsWith("Laptop");
+    }
+
+    @Test
+    void testFindByNamePrefix_NoMatch_ReturnsEmpty() {
+        var results = repository.findByNamePrefix("ZZZNotExists");
+        assertThat(results).isEmpty();
+    }
 }
