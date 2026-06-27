@@ -27,9 +27,12 @@ product-management/
 │   ├── src/
 │   ├── Dockerfile
 │   └── nginx.conf
+├── docker/
+│   └── gateway.conf                nginx gateway (Docker Compose)
 ├── .github/workflows/
 │   ├── docker-publish.yml          CI/CD backend
 │   └── docker-publish-web.yml      CI/CD frontend
+├── docker-compose.yml
 ├── product-management.postman_collection.json
 └── README.md
 ```

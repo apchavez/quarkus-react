@@ -106,7 +106,59 @@
       }
     },
     {
-      "name": "04 - Update Product",
+      "name": "04 - Find By SKU",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('SKU matches', () => {",
+              "    pm.expect(pm.response.json().data.sku).to.equal('LAP-001');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{url}}/api/v1/products/sku/LAP-001",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "products", "sku", "LAP-001"]
+        }
+      }
+    },
+    {
+      "name": "05 - Search By Name Prefix",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns array with results', () => {",
+              "    const data = pm.response.json().data;",
+              "    pm.expect(data).to.be.an('array').and.have.length.above(0);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{url}}/api/v1/products/search?prefix=Lap",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "products", "search"],
+          "query": [{ "key": "prefix", "value": "Lap" }]
+        }
+      }
+    },
+    {
+      "name": "06 - Update Product",
       "event": [
         {
           "listen": "test",
@@ -139,7 +191,7 @@
       }
     },
     {
-      "name": "05 - Delete Product",
+      "name": "07 - Delete Product",
       "event": [
         {
           "listen": "test",
@@ -158,57 +210,6 @@
           "raw": "{{url}}/api/v1/products/{{id}}",
           "host": ["{{url}}"],
           "path": ["api", "v1", "products", "{{id}}"]
-        }
-      }
-    },
-    {
-      "name": "06 - Find By SKU",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "pm.test('SKU matches', () => {",
-              "    pm.expect(pm.response.json().data.sku).to.equal('LAP-001');",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{url}}/api/v1/products/sku/LAP-001",
-          "host": ["{{url}}"],
-          "path": ["api", "v1", "products", "sku", "LAP-001"]
-        }
-      }
-    },
-    {
-      "name": "07 - Search By Name Prefix",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "pm.test('Returns array', () => {",
-              "    pm.expect(pm.response.json().data).to.be.an('array');",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{url}}/api/v1/products/search?prefix=Lap",
-          "host": ["{{url}}"],
-          "path": ["api", "v1", "products", "search"],
-          "query": [{ "key": "prefix", "value": "Lap" }]
         }
       }
     },

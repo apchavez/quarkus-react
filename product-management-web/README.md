@@ -87,6 +87,9 @@ pnpm test         # ejecuta una vez (CI mode)
 pnpm test:watch   # modo watch
 ```
 
+27 tests en 3 suites:
+
+- `useProducts.test.ts` — 11 tests: carga inicial, create, update, delete, errores, paginación, editingProduct
 - `ProductForm.test.tsx` — 10 tests: validación, envío, modo edición, revalidación en tiempo real
 - `ProductsTable.test.tsx` — 6 tests: renderizado, lista vacía, callbacks de editar/eliminar
 
