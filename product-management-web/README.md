@@ -41,6 +41,8 @@ src/
 │   ├── ProductForm.tsx
 │   └── ProductsTable.tsx
 ├── hooks/
+│   ├── __tests__/
+│   │   └── useProducts.test.ts
 │   └── useProducts.ts        # Estado y lógica de productos
 ├── test/
 │   └── setup.ts              # Configuración global de tests

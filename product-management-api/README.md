@@ -199,7 +199,7 @@ docker build -t product-web .
 | Workflow | Trigger | Jobs |
 |---|---|---|
 | `docker-publish.yml` | Push a `main` en `product-management-api/**` | test → build → push `ghcr.io/apchavez/product-api:<sha>` |
-| `docker-publish-web.yml` | Push a `main` en `product-management-web/**` | type-check + build → push `ghcr.io/apchavez/product-web:<sha>` |
+| `docker-publish-web.yml` | Push a `main` en `product-management-web/**` | type-check → test → build → push `ghcr.io/apchavez/product-web:<sha>` |
 
 ---
 
