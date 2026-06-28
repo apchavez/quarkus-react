@@ -30,11 +30,12 @@ export default defineConfig(({ mode }) => {
       coverage: {
         provider: 'v8',
         reporter: ['text', 'html'],
+        exclude: ['src/main.tsx', 'src/types/**', 'dist/**', 'vite.config.ts', '**/*.d.ts'],
         thresholds: {
-          lines: 60,
-          functions: 50,
-          branches: 70,
-          statements: 60,
+          lines: 80,
+          functions: 80,
+          branches: 80,
+          statements: 80,
         },
       },
     }

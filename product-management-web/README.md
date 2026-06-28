@@ -32,7 +32,12 @@ Frontend para administración de productos, construido con React + TypeScript + 
 
 ```
 src/
+├── __tests__/
+│   ├── App.test.tsx
+│   └── routes.test.tsx
 ├── api/
+│   ├── __tests__/
+│   │   └── productsApi.test.ts
 │   └── productsApi.ts        # Llamadas HTTP al backend
 ├── components/
 │   ├── __tests__/
@@ -84,17 +89,20 @@ El dev server redirige `/api/v1/*` al backend mediante el proxy de Vite.
 
 ```bash
 pnpm test           # ejecuta una vez (CI mode)
-pnpm test:coverage  # ejecuta con reporte de cobertura
+pnpm test:coverage  # ejecuta con reporte de cobertura (verifica umbral ≥ 80%)
 pnpm test:watch     # modo watch
 ```
 
-27 tests en 3 suites:
+50 tests en 6 suites:
 
+- `productsApi.test.ts` — 9 tests: getProducts, createProduct, updateProduct, deleteProduct (happy path + error path)
+- `App.test.tsx` — 10 tests: render, interacciones de UI, paginación, snackbar
+- `routes.test.tsx` — 4 tests: estructura de rutas
 - `useProducts.test.ts` — 11 tests: carga inicial, create, update, delete, errores, paginación, editingProduct
 - `ProductForm.test.tsx` — 10 tests: validación, envío, modo edición, revalidación en tiempo real
 - `ProductsTable.test.tsx` — 6 tests: renderizado, lista vacía, callbacks de editar/eliminar
 
-Coverage actual (Vitest v8): ~66% statements, ~75% branches, ~54% functions. Thresholds configurados en `vite.config.ts` (statements 60%, branches 70%, functions 50%). Los archivos `App.tsx`, `main.tsx`, `routes.tsx` y `productsApi.ts` no tienen tests unitarios — pendiente para escalar a ≥ 80%.
+Coverage (Vitest v8): ≥ 80% en statements, branches, functions y lines. Thresholds configurados en `vite.config.ts`.
 
 ---
 
@@ -117,7 +125,8 @@ GitHub Actions (`.github/workflows/docker-publish-web.yml`):
 
 1. `tsc --noEmit` — verificación de tipos
 2. `pnpm test` — suite de tests
-3. `pnpm build` — build de producción
+3. `pnpm test:coverage` — verificación de cobertura ≥ 80%
+4. `pnpm build` — build de producción
 4. Docker build + push a `ghcr.io/apchavez/product-web` (**solo en push a `main`**, no en PR)
 
 Se dispara en push **y** pull_request hacia `main` dentro de `product-management-web/`.
