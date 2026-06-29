@@ -1,17 +1,17 @@
-name: Build and Push Product API
+﻿name: Build and Push Product API
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'product-management-api/**'
+      - 'api/**'
       - '.github/workflows/docker-publish.yml'
   pull_request:
     branches:
       - main
     paths:
-      - 'product-management-api/**'
+      - 'api/**'
       - '.github/workflows/docker-publish.yml'
 
 jobs:
@@ -42,14 +42,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run tests
-        working-directory: product-management-api
+        working-directory: api
         run: gradle test
         env:
           MONGODB_CONNECTION_STRING: mongodb://localhost:27017
           MONGODB_DATABASE: products_test
 
       - name: Verify coverage
-        working-directory: product-management-api
+        working-directory: api
         run: gradle jacocoTestCoverageVerification
         env:
           MONGODB_CONNECTION_STRING: mongodb://localhost:27017
@@ -78,7 +78,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build Quarkus app
-        working-directory: product-management-api
+        working-directory: api
         run: gradle build -x test
 
       - name: Log in to GitHub Container Registry
@@ -91,7 +91,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
-          context: ./product-management-api
+          context: ./api
           push: true
           tags: |
             ghcr.io/apchavez/product-api:latest

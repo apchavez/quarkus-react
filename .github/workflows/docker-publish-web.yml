@@ -1,17 +1,17 @@
-name: Build and Push Web
+﻿name: Build and Push Web
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'product-management-web/**'
+      - 'web/**'
       - '.github/workflows/docker-publish-web.yml'
   pull_request:
     branches:
       - main
     paths:
-      - 'product-management-web/**'
+      - 'web/**'
       - '.github/workflows/docker-publish-web.yml'
 
 jobs:
@@ -33,23 +33,23 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        working-directory: product-management-web
+        working-directory: web
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        working-directory: product-management-web
+        working-directory: web
         run: pnpm exec tsc --noEmit
 
       - name: Test
-        working-directory: product-management-web
+        working-directory: web
         run: pnpm test
 
       - name: Coverage
-        working-directory: product-management-web
+        working-directory: web
         run: pnpm test:coverage
 
       - name: Build
-        working-directory: product-management-web
+        working-directory: web
         run: pnpm build
 
   push:
@@ -75,7 +75,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
-          context: ./product-management-web
+          context: ./web
           push: true
           tags: |
             ghcr.io/apchavez/product-web:latest

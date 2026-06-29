@@ -1,4 +1,4 @@
-# Product Management Platform
+﻿# Product Management Platform
 
 Aplicación fullstack para administración de productos. Backend con arquitectura hexagonal en Quarkus, frontend SPA en React, despliegue en Kubernetes.
 
@@ -73,7 +73,7 @@ src/main/java/com/products/
 Copiar y completar el archivo de variables de entorno:
 
 ```bash
-cp product-management-api/.env.example product-management-api/.env
+cp api/.env.example api/.env
 ```
 
 ```env
@@ -106,11 +106,11 @@ docker run -d --name mongo -p 27017:27017 mongo:7.0
 docker run -d --name redis -p 6379:6379 redis:7
 
 # 2. Backend (hot-reload)
-cd product-management-api
+cd api
 ./gradlew quarkusDev
 
 # 3. Frontend (hot-reload, en otra terminal)
-cd product-management-web
+cd web
 pnpm install
 pnpm dev
 ```
@@ -122,7 +122,7 @@ Backend en `http://localhost:8080` · Frontend en `http://localhost:5173`
 ## Tests y coverage
 
 ```bash
-cd product-management-api
+cd api
 ./gradlew test
 ./gradlew jacocoTestCoverageVerification
 ```
@@ -218,12 +218,12 @@ Los archivos están en `postman/` en la raíz del repositorio.
 
 ```bash
 # Backend
-cd product-management-api
+cd api
 ./gradlew build -x test
 docker build -t product-api .
 
 # Frontend
-cd product-management-web
+cd web
 docker build -t product-web .
 ```
 
@@ -233,8 +233,8 @@ docker build -t product-web .
 
 | Workflow | Trigger | Jobs |
 |---|---|---|
-| `docker-publish.yml` | Push y PR a `main` en `product-management-api/**` | test + coverage → (solo push) build → push `ghcr.io/apchavez/product-api:<sha>` |
-| `docker-publish-web.yml` | Push y PR a `main` en `product-management-web/**` | type-check → test → build → (solo push) push `ghcr.io/apchavez/product-web:<sha>` |
+| `docker-publish.yml` | Push y PR a `main` en `api/**` | test + coverage → (solo push) build → push `ghcr.io/apchavez/product-api:<sha>` |
+| `docker-publish-web.yml` | Push y PR a `main` en `web/**` | type-check → test → build → (solo push) push `ghcr.io/apchavez/product-web:<sha>` |
 
 ---
 

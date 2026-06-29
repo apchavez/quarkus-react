@@ -1,4 +1,4 @@
-name: product-management
+﻿name: product-management
 
 services:
 
@@ -26,7 +26,7 @@ services:
       retries: 5
 
   product-api:
-    build: ./product-management-api
+    build: ./api
     environment:
       APP_ENVIRONMENT: local
       PORT: "8080"
@@ -46,7 +46,7 @@ services:
       start_period: 60s
 
   product-web:
-    build: ./product-management-web
+    build: ./web
 
   gateway:
     image: nginx:alpine

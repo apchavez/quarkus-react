@@ -46,11 +46,11 @@ Both services are independently containerized and orchestrated via Kubernetes or
 
 ```text
 product-management/
-├── product-management-api/         Java + Quarkus backend
+├── api/         Java + Quarkus backend
 │   ├── src/
 │   ├── Dockerfile
 │   └── build.gradle
-├── product-management-web/         React + Vite frontend
+├── web/         React + Vite frontend
 │   ├── src/
 │   ├── Dockerfile
 │   └── nginx.conf
@@ -105,17 +105,17 @@ Add `product.local` to `/etc/hosts` pointing to your Ingress controller IP, then
 
 ```bash
 # Backend
-cd product-management-api
+cd api
 ./gradlew test
 
 # Frontend
-cd product-management-web
+cd web
 npm test
 ```
 
 Both services have independent test suites. The backend covers use cases, persistence adapters, and REST endpoints. All tests run locally without Docker or external services.
 
-See [`product-management-api/README.md`](product-management-api/README.md) for full coverage details and test descriptions.
+See [`api/README.md`](api/README.md) for full coverage details and test descriptions.
 
 ---
 
@@ -158,7 +158,7 @@ Import all three files into Postman, select the appropriate environment, and run
 
 ## Detailed Documentation
 
-See [`product-management-api/README.md`](product-management-api/README.md) for complete backend setup, endpoints, and deployment instructions.
+See [`api/README.md`](api/README.md) for complete backend setup, endpoints, and deployment instructions.
 
 ---
 

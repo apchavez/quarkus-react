@@ -1,4 +1,4 @@
-# Product Management Web
+﻿# Product Management Web
 
 Frontend para administración de productos, construido con React + TypeScript + Vite.
 
@@ -129,7 +129,7 @@ GitHub Actions (`.github/workflows/docker-publish-web.yml`):
 4. `pnpm build` — build de producción
 4. Docker build + push a `ghcr.io/apchavez/product-web` (**solo en push a `main`**, no en PR)
 
-Se dispara en push **y** pull_request hacia `main` dentro de `product-management-web/`.
+Se dispara en push **y** pull_request hacia `main` dentro de `web/`.
 
 ---
 

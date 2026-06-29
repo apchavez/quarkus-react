@@ -1,4 +1,4 @@
-# =====================================
+﻿# =====================================
 # ROOT FULLSTACK PROJECT
 # product-management
 # =====================================
@@ -10,26 +10,26 @@
 .env.*
 !.env.example
 
-product-management-api/.env
-product-management-api/.env.*
-!product-management-api/.env.example
+api/.env
+api/.env.*
+!api/.env.example
 
-product-management-web/.env
-product-management-web/.env.*
-!product-management-web/.env.example
+web/.env
+web/.env.*
+!web/.env.example
 
 # =====================================
 # BACKEND - JAVA / GRADLE / QUARKUS
 # =====================================
-product-management-api/.gradle/
-product-management-api/build/
-product-management-api/bin/
-product-management-api/target/
-product-management-api/out/
-product-management-api/.quarkus/
+api/.gradle/
+api/build/
+api/bin/
+api/target/
+api/out/
+api/.quarkus/
 
 # Keep wrapper jar
-!product-management-api/gradle/wrapper/gradle-wrapper.jar
+!api/gradle/wrapper/gradle-wrapper.jar
 
 # Java compiled
 *.class
@@ -39,10 +39,10 @@ product-management-api/.quarkus/
 # =====================================
 # FRONTEND - NODE / VITE / PNPM
 # =====================================
-product-management-web/node_modules/
-product-management-web/dist/
-product-management-web/build/
-product-management-web/.vite/
+web/node_modules/
+web/dist/
+web/build/
+web/.vite/
 
 # pnpm/npm logs
 pnpm-debug.log*
@@ -107,5 +107,5 @@ temp/
 # Docker / Kubernetes local artifacts
 # Raw k8s manifests (k8s/) are the source of truth — Helm chart is not used.
 *.tar
-product-management-api/product-api.yaml
-product-management-api/product-api/
+api/product-api.yaml
+api/product-api/

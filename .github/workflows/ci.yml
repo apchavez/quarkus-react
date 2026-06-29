@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Test and verify coverage
-        working-directory: product-management-api
+        working-directory: api
         run: gradle test jacocoTestCoverageVerification
         env:
           MONGODB_CONNECTION_STRING: mongodb://localhost:27017
@@ -54,15 +54,15 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        working-directory: product-management-web
+        working-directory: web
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        working-directory: product-management-web
+        working-directory: web
         run: pnpm exec tsc --noEmit
 
       - name: Test and coverage
-        working-directory: product-management-web
+        working-directory: web
         run: pnpm test:coverage
 
   sonar:
@@ -92,7 +92,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build and test backend
-        working-directory: product-management-api
+        working-directory: api
         run: gradle test jacocoTestReport
         env:
           MONGODB_CONNECTION_STRING: mongodb://localhost:27017
