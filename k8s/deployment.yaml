@@ -27,7 +27,7 @@ spec:
         fsGroup: 1001
       containers:
       - name: product-api
-        image: ghcr.io/apchavez/product-api:latest
+        image: ghcr.io/apchavez/product-api:sha-3ca05ed7b61c81b73d23b654c10b6bc939ba9a8b
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
