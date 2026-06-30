@@ -66,7 +66,8 @@ product-management/
 │   ├── web-service.yaml
 │   ├── ingress.yaml
 │   ├── prometheus-rule.yaml        PrometheusRule CRD — alert rules
-│   └── grafana.yaml                Grafana 11.1 deployment + pre-provisioned dashboard
+│   ├── grafana.yaml                Grafana 11.1 deployment + pre-provisioned dashboard
+│   └── network-policy.yaml         NetworkPolicy — restricts ingress/egress to known services
 ├── docker/
 │   └── gateway.conf                nginx gateway (Docker Compose)
 ├── postman/
