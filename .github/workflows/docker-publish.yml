@@ -61,7 +61,7 @@ jobs:
     if: github.event_name == 'push'
 
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
@@ -95,4 +95,14 @@ jobs:
           push: true
           tags: |
             ghcr.io/apchavez/product-api:latest
-            ghcr.io/apchavez/product-api:${{ github.sha }}
+            ghcr.io/apchavez/product-api:sha-${{ github.sha }}
+
+      - name: Pin image tag in k8s deployment manifest
+        run: |
+          IMAGE_TAG="sha-${{ github.sha }}"
+          sed -i "s|ghcr.io/apchavez/product-api:.*|ghcr.io/apchavez/product-api:${IMAGE_TAG}|g" k8s/deployment.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/deployment.yaml
+          git diff --cached --quiet || git commit -m "ci: pin product-api image to sha-${{ github.sha }}"
+          git push

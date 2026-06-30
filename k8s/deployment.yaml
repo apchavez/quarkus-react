@@ -21,10 +21,19 @@ spec:
         app: product-api
 
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
       containers:
       - name: product-api
         image: ghcr.io/apchavez/product-api:latest
         imagePullPolicy: Always
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
 
         envFrom:
         - configMapRef:
@@ -58,3 +67,10 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 5
           failureThreshold: 3
+
+        startupProbe:
+          httpGet:
+            path: /api/v1/q/health/live
+            port: 8080
+          failureThreshold: 30
+          periodSeconds: 10

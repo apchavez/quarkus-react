@@ -4,6 +4,7 @@ import com.products.application.dto.ProductRequest;
 import com.products.application.dto.ProductResponse;
 import com.products.application.dto.ProductsPagedResponse;
 import com.products.application.port.in.ProductServicePort;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -44,10 +45,13 @@ public class ProductResource {
     ProductServicePort productService;
 
     @POST
+    @RolesAllowed("ADMIN")
     @Operation(summary = "Create a product", description = "Registers a new product. SKU must be unique across the catalogue.")
     @APIResponses({
         @APIResponse(responseCode = "201", description = "Product created — body contains the generated id"),
         @APIResponse(responseCode = "400", description = "Validation error on request fields"),
+        @APIResponse(responseCode = "401", description = "Missing or invalid JWT"),
+        @APIResponse(responseCode = "403", description = "Insufficient role — ADMIN required"),
         @APIResponse(responseCode = "409", description = "A product with the same SKU already exists")
     })
     public Response insert(@Valid ProductRequest request) {
@@ -57,10 +61,13 @@ public class ProductResource {
 
     @PUT
     @Path("{id}")
+    @RolesAllowed("ADMIN")
     @Operation(summary = "Update a product", description = "Fully replaces an existing product's data by its ID.")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Product updated successfully"),
         @APIResponse(responseCode = "400", description = "Validation error or invalid ID format"),
+        @APIResponse(responseCode = "401", description = "Missing or invalid JWT"),
+        @APIResponse(responseCode = "403", description = "Insufficient role — ADMIN required"),
         @APIResponse(responseCode = "404", description = "Product not found")
     })
     public Response update(
@@ -73,10 +80,13 @@ public class ProductResource {
 
     @DELETE
     @Path("{id}")
+    @RolesAllowed("ADMIN")
     @Operation(summary = "Delete a product", description = "Permanently removes a product by its ID.")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Product deleted successfully"),
         @APIResponse(responseCode = "400", description = "Invalid ID format"),
+        @APIResponse(responseCode = "401", description = "Missing or invalid JWT"),
+        @APIResponse(responseCode = "403", description = "Insufficient role — ADMIN required"),
         @APIResponse(responseCode = "404", description = "Product not found")
     })
     public Response delete(
@@ -88,10 +98,12 @@ public class ProductResource {
 
     @GET
     @Path("{id}")
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Find a product by ID")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Product found"),
         @APIResponse(responseCode = "400", description = "Invalid ID format"),
+        @APIResponse(responseCode = "401", description = "Missing or invalid JWT"),
         @APIResponse(responseCode = "404", description = "Product not found")
     })
     public Response findById(
@@ -102,10 +114,12 @@ public class ProductResource {
     }
 
     @GET
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "List all products (paginated)")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Paginated product list"),
-        @APIResponse(responseCode = "400", description = "Invalid pagination parameters")
+        @APIResponse(responseCode = "400", description = "Invalid pagination parameters"),
+        @APIResponse(responseCode = "401", description = "Missing or invalid JWT")
     })
     public Response findAll(
             @Parameter(description = "Zero-based page number (default 0)")
@@ -118,10 +132,12 @@ public class ProductResource {
 
     @GET
     @Path("/sku/{sku}")
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Find a product by SKU")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Product found"),
         @APIResponse(responseCode = "400", description = "Invalid SKU format"),
+        @APIResponse(responseCode = "401", description = "Missing or invalid JWT"),
         @APIResponse(responseCode = "404", description = "Product not found")
     })
     public Response findBySku(
@@ -133,10 +149,12 @@ public class ProductResource {
 
     @GET
     @Path("/search")
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Search products by name prefix", description = "Case-insensitive prefix search on the product name field.")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Matching products (may be an empty list)"),
-        @APIResponse(responseCode = "400", description = "Missing or invalid prefix parameter")
+        @APIResponse(responseCode = "400", description = "Missing or invalid prefix parameter"),
+        @APIResponse(responseCode = "401", description = "Missing or invalid JWT")
     })
     public Response findByNamePrefix(
             @Parameter(description = "Name prefix to search (case-insensitive, max 100 chars)")

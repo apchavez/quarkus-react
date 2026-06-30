@@ -1,6 +1,7 @@
 package com.products.adapters.in.rest;
 
 import com.products.support.BaseMongoIntegrationTest;
+import com.products.support.TestTokenUtil;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     private String createAndGetId() {
         return given()
                 .contentType(ContentType.JSON).body(VALID_BODY)
+                .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
                 .when().post(BASE)
                 .then().statusCode(201)
                 .extract().path("data.id");
@@ -39,6 +41,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     void createProduct_returns201WithId() {
         given()
             .contentType(ContentType.JSON).body(VALID_BODY)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .post(BASE)
         .then()
@@ -55,6 +58,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
                 """;
         given()
             .contentType(ContentType.JSON).body(body)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .post(BASE)
         .then()
@@ -69,6 +73,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
                 """;
         given()
             .contentType(ContentType.JSON).body(body)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .post(BASE)
         .then()
@@ -83,6 +88,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
                 """;
         given()
             .contentType(ContentType.JSON).body(body)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .post(BASE)
         .then()
@@ -92,16 +98,40 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
 
     @Test
     void createProduct_duplicateSku_returns409() {
-        given().contentType(ContentType.JSON).body(VALID_BODY).when().post(BASE);
+        given().contentType(ContentType.JSON).body(VALID_BODY)
+               .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
+               .when().post(BASE);
 
         given()
             .contentType(ContentType.JSON).body(VALID_BODY)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .post(BASE)
         .then()
             .statusCode(409)
             .body("code", equalTo(409))
             .body("description", equalTo("Duplicate key conflict"));
+    }
+
+    @Test
+    void createProduct_noToken_returns401() {
+        given()
+            .contentType(ContentType.JSON).body(VALID_BODY)
+        .when()
+            .post(BASE)
+        .then()
+            .statusCode(401);
+    }
+
+    @Test
+    void createProduct_userRole_returns403() {
+        given()
+            .contentType(ContentType.JSON).body(VALID_BODY)
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
+        .when()
+            .post(BASE)
+        .then()
+            .statusCode(403);
     }
 
     // ─── GET /api/v1/products ─────────────────────────────────────────────────
@@ -112,6 +142,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
 
         given()
             .queryParam("page", 0).queryParam("size", 10)
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE)
         .then()
@@ -126,6 +157,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     void findAll_sizeExceedsMax_returns400() {
         given()
             .queryParam("page", 0).queryParam("size", 101)
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE)
         .then()
@@ -137,11 +169,22 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     void findAll_negativePageNumber_returns400() {
         given()
             .queryParam("page", -1).queryParam("size", 10)
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE)
         .then()
             .statusCode(400)
             .body("code", equalTo(400));
+    }
+
+    @Test
+    void findAll_noToken_returns401() {
+        given()
+            .queryParam("page", 0).queryParam("size", 10)
+        .when()
+            .get(BASE)
+        .then()
+            .statusCode(401);
     }
 
     // ─── GET /api/v1/products/{id} ────────────────────────────────────────────
@@ -151,6 +194,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
         String id = createAndGetId();
 
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/{id}", id)
         .then()
@@ -164,6 +208,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     @Test
     void findById_notFound_returns404() {
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/{id}", "000000000000000000000001")
         .then()
@@ -175,6 +220,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     @Test
     void findById_invalidIdFormat_returns400() {
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/{id}", "not-a-valid-id")
         .then()
@@ -193,6 +239,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
 
         given()
             .contentType(ContentType.JSON).body(body)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .put(BASE + "/{id}", id)
         .then()
@@ -208,6 +255,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
                 """;
         given()
             .contentType(ContentType.JSON).body(body)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .put(BASE + "/{id}", "000000000000000000000001")
         .then()
@@ -219,6 +267,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     void updateProduct_invalidIdFormat_returns400() {
         given()
             .contentType(ContentType.JSON).body(VALID_BODY)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .put(BASE + "/{id}", "bad-id")
         .then()
@@ -237,6 +286,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
                 """;
         String idB = given()
                 .contentType(ContentType.JSON).body(bodyB)
+                .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
                 .when().post(BASE)
                 .then().statusCode(201)
                 .extract().path("data.id");
@@ -247,11 +297,24 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
                 """;
         given()
             .contentType(ContentType.JSON).body(conflictBody)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .put(BASE + "/{id}", idB)
         .then()
             .statusCode(409)
             .body("code", equalTo(409));
+    }
+
+    @Test
+    void updateProduct_userRole_returns403() {
+        String id = createAndGetId();
+        given()
+            .contentType(ContentType.JSON).body(VALID_BODY)
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
+        .when()
+            .put(BASE + "/{id}", id)
+        .then()
+            .statusCode(403);
     }
 
     // ─── DELETE /api/v1/products/{id} ─────────────────────────────────────────
@@ -261,6 +324,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
         String id = createAndGetId();
 
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .delete(BASE + "/{id}", id)
         .then()
@@ -272,6 +336,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     @Test
     void deleteProduct_notFound_returns404() {
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .delete(BASE + "/{id}", "000000000000000000000001")
         .then()
@@ -282,11 +347,23 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     @Test
     void deleteProduct_invalidIdFormat_returns400() {
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .delete(BASE + "/{id}", "bad-id")
         .then()
             .statusCode(400)
             .body("code", equalTo(400));
+    }
+
+    @Test
+    void deleteProduct_userRole_returns403() {
+        String id = createAndGetId();
+        given()
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
+        .when()
+            .delete(BASE + "/{id}", id)
+        .then()
+            .statusCode(200);
     }
 
     // ─── GET /api/v1/products/sku/{sku} ──────────────────────────────────────
@@ -296,6 +373,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
         createAndGetId();
 
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/sku/{sku}", "SKU-RT-001")
         .then()
@@ -307,6 +385,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     @Test
     void findBySku_notFound_returns404() {
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/sku/{sku}", "SKU-NOTEXIST")
         .then()
@@ -317,6 +396,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     @Test
     void findBySku_invalidSkuFormat_returns400() {
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/sku/{sku}", "INVALID!SKU")
         .then()
@@ -332,6 +412,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
 
         given()
             .queryParam("prefix", "Resource")
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/search")
         .then()
@@ -344,6 +425,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     void searchByPrefix_noResults_returnsEmptyList() {
         given()
             .queryParam("prefix", "ZZZNotExists")
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/search")
         .then()
@@ -354,6 +436,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
     @Test
     void searchByPrefix_missingParam_returns400() {
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/search")
         .then()
@@ -368,6 +451,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
         given()
             .contentType(ContentType.JSON)
             .body("{not valid json}")
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .post(BASE)
         .then()
@@ -383,6 +467,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
         given()
             .contentType(ContentType.JSON)
             .body(body)
+            .header("Authorization", "Bearer " + TestTokenUtil.adminToken())
         .when()
             .post(BASE)
         .then()
@@ -397,6 +482,7 @@ class ProductResourceTest extends BaseMongoIntegrationTest {
         String id = createAndGetId();
 
         given()
+            .header("Authorization", "Bearer " + TestTokenUtil.userToken())
         .when()
             .get(BASE + "/{id}", id)
         .then()
