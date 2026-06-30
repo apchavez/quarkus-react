@@ -1,6 +1,7 @@
 package com.products.adapters.out.persistence;
 
 import com.mongodb.MongoWriteException;
+import com.mongodb.client.model.Filters;
 import com.products.application.port.out.ProductRepositoryPort;
 import com.products.domain.model.PagedResponse;
 import com.products.domain.model.Product;
@@ -13,6 +14,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -80,7 +82,9 @@ public class MongoProductRepository implements ProductRepositoryPort, PanacheMon
     public List<Product> findByNamePrefix(String namePrefix) {
         // Escape PCRE metacharacters before embedding in the regex anchor
         String escaped = namePrefix.replaceAll("[.+*?^${}()|\\[\\]\\\\]", "\\\\$0");
-        return find("{'name': {$regex: ?1, $options: 'i'}}", "^" + escaped).list();
+        return mongoCollection()
+            .find(Filters.regex("name", "^" + escaped, "i"))
+            .into(new ArrayList<>());
     }
 
     @Override
