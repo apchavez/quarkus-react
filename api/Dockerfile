@@ -1,4 +1,4 @@
-FROM gradle:9.6-jdk21 AS builder
+FROM --platform=$BUILDPLATFORM gradle:9.6-jdk21 AS builder
 
 WORKDIR /app
 

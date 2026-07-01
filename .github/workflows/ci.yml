@@ -12,10 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mongodb:
-        image: mongo:7.0
-        ports:
-          - 27017:27017
       redis:
         image: redis:7-alpine
         ports:
@@ -45,9 +41,6 @@ jobs:
       - name: Test and verify coverage
         working-directory: api
         run: gradle test jacocoTestCoverageVerification
-        env:
-          MONGODB_CONNECTION_STRING: mongodb://localhost:27017
-          MONGODB_DATABASE: products_test
 
   frontend:
     name: Frontend — typecheck, test & coverage
@@ -118,10 +111,6 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.SONAR_ORGANIZATION != ''
 
     services:
-      mongodb:
-        image: mongo:7.0
-        ports:
-          - 27017:27017
       redis:
         image: redis:7-alpine
         ports:
@@ -140,9 +129,6 @@ jobs:
       - name: Build and test backend
         working-directory: api
         run: gradle test jacocoTestReport
-        env:
-          MONGODB_CONNECTION_STRING: mongodb://localhost:27017
-          MONGODB_DATABASE: products_test
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v5
