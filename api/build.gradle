@@ -44,6 +44,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-opentelemetry'
     implementation 'io.quarkus:quarkus-smallrye-jwt'
     implementation 'io.quarkus:quarkus-smallrye-jwt-build'
+    implementation 'io.quarkus:quarkus-logging-json'
 
     /* MapStruct */
     implementation 'org.mapstruct:mapstruct:1.6.3'

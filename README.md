@@ -111,26 +111,49 @@ Add `product.local` to `/etc/hosts` pointing to your Ingress controller IP, then
 cd api
 ./gradlew test
 
-# Frontend
+# Frontend unit tests
 cd web
-npm test
+pnpm test
+
+# Frontend E2E tests (Playwright)
+cd web
+pnpm test:e2e
 ```
 
 Both services have independent test suites. The backend covers use cases, persistence adapters, and REST endpoints. All tests run locally without Docker or external services.
 
 See [`api/README.md`](api/README.md) for full coverage details and test descriptions.
 
+**Frontend E2E (Playwright):** `web/e2e/products.spec.ts` covers page load, create, edit, delete, and form validation flows. All API calls are mocked with `page.route()` — no backend required to run the tests.
+
 ---
 
 ## CI/CD
 
-GitHub Actions runs tests and publishes Docker images to GHCR:
+GitHub Actions runs tests, publishes Docker images to GHCR, and deploys to Kubernetes:
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `ci.yml` | Every push / PR to `main` | Backend tests + JaCoCo coverage gate; frontend typecheck, tests, and coverage; SonarCloud (on main) |
-| `docker-publish.yml` | Push / PR to `main` (`api/**`) | Backend tests + coverage, then builds and pushes `ghcr.io/apchavez/product-api` |
-| `docker-publish-web.yml` | Push / PR to `main` (`web/**`) | Frontend typecheck, tests, coverage, build, then pushes `ghcr.io/apchavez/product-web` |
+| `ci.yml` | Every push / PR to `main` | Backend tests + JaCoCo coverage gate; frontend typecheck, tests, and coverage; Playwright E2E; SonarCloud (on main) |
+| `docker-publish.yml` | Push / PR to `main` (`api/**`) | Backend tests + coverage → builds and pushes `ghcr.io/apchavez/product-api:sha-<SHA>` → pins tag in `k8s/deployment.yaml` |
+| `docker-publish-web.yml` | Push / PR to `main` (`web/**`) | Frontend typecheck, tests, coverage → builds and pushes `ghcr.io/apchavez/product-web:sha-<SHA>` → pins tag in `k8s/web-deployment.yaml` |
+| `deploy.yml` | Automatic after docker-publish (any service) · Manual via `workflow_dispatch` | `kubectl apply -f k8s/` → verifies rollout of `product-api` and `product-web` |
+
+### Deploy flow
+
+```
+push to main (api/ or web/)
+  → docker-publish*.yml  (test → build → push image → pin SHA tag in k8s manifest)
+  → deploy.yml           (checkout main → kubectl apply -f k8s/ → rollout status)
+```
+
+**Required secret:** `KUBECONFIG` — kubeconfig file content, configured in the `production` GitHub environment.
+
+To trigger a manual redeploy without a code change:
+
+```bash
+gh workflow run deploy.yml
+```
 
 ---
 
@@ -142,6 +165,27 @@ GitHub Actions runs tests and publishes Docker images to GHCR:
 | Health (liveness) | `/api/v1/q/health/live` | SmallRye Health |
 | Health (readiness) | `/api/v1/q/health/ready` | Pings MongoDB and Redis with 2s timeout |
 | Traces | OTLP gRPC `$OTEL_EXPORTER_OTLP_ENDPOINT` | OpenTelemetry auto-instrumentation |
+| Logs | stdout | JSON (ECS-like) in `prod` profile via `quarkus-logging-json`; human-readable in `dev` |
+
+### Structured JSON logging
+
+In the `prod` profile, logs are emitted as structured JSON to stdout — ready for Loki, Fluentd, or any log aggregator running as a sidecar in Kubernetes.
+
+```json
+{
+  "timestamp": "2024-06-30T10:15:30.123Z",
+  "level": "INFO",
+  "loggerName": "com.products.adapters.in.rest.ProductResource",
+  "message": "Creating product with SKU PROD-001",
+  "mdc": {
+    "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "spanId": "00f067aa0ba902b7"
+  },
+  "threadName": "executor-thread-1"
+}
+```
+
+`traceId` and `spanId` are injected automatically into MDC by the `quarkus-opentelemetry` extension. In `dev` mode, the standard human-readable console format is used.
 
 ### Alerting
 
@@ -178,6 +222,27 @@ The `postman/` folder contains the collection and two environments.
 Import all three files into Postman, select the appropriate environment, and run the requests in order — `01 - Create Product` automatically captures `productId` for subsequent requests.
 
 > For K8s: add `product.local` to `/etc/hosts` pointing to the Ingress controller IP before running the collection.
+
+---
+
+## OpenAPI
+
+Documentation is auto-generated at startup from MicroProfile OpenAPI annotations (`quarkus-smallrye-openapi` extension).
+
+| Endpoint | URL | Notes |
+|---|---|---|
+| Swagger UI | `http://localhost:8080/api/v1/q/swagger-ui` | Dev mode only |
+| OpenAPI spec | `http://localhost:8080/api/v1/q/openapi` | Always available |
+
+The Swagger UI is enabled in dev mode only (`%dev.quarkus.swagger-ui.enable=true`). To test protected endpoints from the UI, click **Authorize** and enter `Bearer <token>`. All endpoints require the `BearerAuth` scheme. Roles: `ADMIN` (write access), `USER` (read-only).
+
+**Start in dev mode:**
+
+```bash
+cd api
+./gradlew quarkusDev
+# Swagger UI → http://localhost:8080/api/v1/q/swagger-ui
+```
 
 ---
 

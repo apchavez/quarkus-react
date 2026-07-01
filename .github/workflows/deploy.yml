@@ -1,0 +1,55 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Build and Push Product API", "Build and Push Web"]
+    branches: [main]
+    types: [completed]
+
+jobs:
+  deploy:
+    name: Deploy to cluster
+    runs-on: ubuntu-latest
+    environment: production
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v5
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Read pinned image tags
+        id: tags
+        run: |
+          API_TAG=$(grep -oP 'product-api:\K\S+' k8s/deployment.yaml)
+          WEB_TAG=$(grep -oP 'product-web:\K\S+' k8s/web-deployment.yaml)
+          echo "api=$API_TAG" >> "$GITHUB_OUTPUT"
+          echo "web=$WEB_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install product-management ./chart \
+            --namespace product-management \
+            --create-namespace \
+            --set api.image.tag=${{ steps.tags.outputs.api }} \
+            --set web.image.tag=${{ steps.tags.outputs.web }} \
+            --set secrets.mongoUsername=${{ secrets.MONGO_USERNAME }} \
+            --set secrets.mongoPassword=${{ secrets.MONGO_PASSWORD }} \
+            --set "secrets.mongoConnectionString=${{ secrets.MONGODB_CONNECTION_STRING }}" \
+            --wait --timeout=120s

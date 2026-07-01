@@ -1,0 +1,49 @@
+nameOverride: ""
+
+api:
+  image:
+    repository: ghcr.io/apchavez/product-api
+    tag: ""
+    pullPolicy: Always
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+web:
+  image:
+    repository: ghcr.io/apchavez/product-web
+    tag: latest
+    pullPolicy: Always
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+config:
+  appEnvironment: production
+  port: "8080"
+  mongoDatabase: products
+  redisUrl: redis://redis-service:6379
+  otelEndpoint: http://otel-collector:4317
+
+secrets:
+  mongoUsername: ""
+  mongoPassword: ""
+  mongoConnectionString: ""
+
+ingress:
+  host: product.local
+  tlsSecretName: product-local-tls
+  clusterIssuer: selfsigned-cluster-issuer
+
+monitoring:
+  enabled: true
