@@ -1,0 +1,102 @@
+plugins {
+    id 'java'
+    id 'io.quarkus' version '3.37.0'
+    id 'jacoco'
+    id 'org.sonarqube' version '7.3.1.8318'
+}
+
+group = 'com.products'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenLocal() {
+        content {
+            includeGroup 'com.products'
+        }
+    }
+    mavenCentral()
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+dependencies {
+    /* Quarkus BOM */
+    implementation platform('io.quarkus.platform:quarkus-bom:3.37.0')
+
+    /* Quarkus extensions */
+    implementation 'io.quarkus:quarkus-arc'
+    implementation 'io.quarkus:quarkus-rest-jackson'
+    implementation 'io.quarkus:quarkus-mongodb-panache'
+    implementation 'io.quarkus:quarkus-redis-client'
+    implementation 'io.quarkus:quarkus-cache'
+    implementation 'io.quarkus:quarkus-hibernate-validator'
+    implementation 'io.quarkus:quarkus-smallrye-health'
+    implementation 'io.quarkus:quarkus-smallrye-openapi'
+    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+    implementation 'io.quarkus:quarkus-opentelemetry'
+    implementation 'io.quarkus:quarkus-smallrye-jwt'
+    implementation 'io.quarkus:quarkus-smallrye-jwt-build'
+    implementation 'io.quarkus:quarkus-elytron-security-common'
+    implementation 'io.quarkus:quarkus-logging-json'
+
+    /* MapStruct */
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    /* Lombok */
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    /* Test */
+    testImplementation 'io.quarkus:quarkus-junit5'
+    testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'io.quarkus:quarkus-junit5-mockito'
+    testImplementation 'org.assertj:assertj-core:3.27.7'
+    testImplementation 'io.quarkus:quarkus-jacoco'
+    testImplementation 'org.testcontainers:testcontainers-mongodb'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty 'java.util.logging.manager', 'org.jboss.logmanager.LogManager'
+    finalizedBy tasks.named('jacocoTestReport')
+}
+
+jacoco {
+    toolVersion = '0.8.11'
+}
+
+tasks.named('jacocoTestReport') {
+    dependsOn tasks.named('test')
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+}
+
+tasks.named('jacocoTestCoverageVerification') {
+    dependsOn tasks.named('jacocoTestReport')
+    executionData fileTree(layout.buildDirectory).include('jacoco/test.exec', 'jacoco-quarkus.exec')
+    violationRules {
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'LINE'
+                value   = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+        }
+    }
+}
+
+/* Enable Quarkus native build support (configured via properties) */
+// Native arguments are already defined in application.properties

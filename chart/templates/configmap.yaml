@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: product-api-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "product-management.labels" . | nindent 4 }}
+data:
+  APP_ENVIRONMENT: {{ .Values.config.appEnvironment | quote }}
+  PORT: {{ .Values.config.port | quote }}
+  MONGODB_DATABASE: {{ .Values.config.mongoDatabase | quote }}
+  REDIS_URL: {{ .Values.config.redisUrl | quote }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.config.otelEndpoint | quote }}

@@ -1,0 +1,117 @@
+name: Build and Push Web
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web/**'
+      - '.github/workflows/docker-publish-web.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'web/**'
+      - '.github/workflows/docker-publish-web.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9
+
+      - name: Install dependencies
+        working-directory: web
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        working-directory: web
+        run: pnpm exec tsc --noEmit
+
+      - name: Test
+        working-directory: web
+        run: pnpm test
+
+      - name: Coverage
+        working-directory: web
+        run: pnpm test:coverage
+
+      - name: Build
+        working-directory: web
+        run: pnpm build
+
+  push:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push'
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: ./web
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/apchavez/product-web:latest
+            ghcr.io/apchavez/product-web:sha-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.1.2
+
+      - name: Sign Web image with Cosign (keyless)
+        run: |
+          cosign sign --yes \
+            "ghcr.io/apchavez/product-web@${{ steps.build.outputs.digest }}"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-name: ghcr.io/apchavez/product-web
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/apchavez/product-web@${{ steps.build.outputs.digest }}
+          artifact-name: sbom-web-${{ github.sha }}.spdx.json
+          output-file: sbom-web.spdx.json
+          format: spdx-json
