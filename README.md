@@ -1,7 +1,7 @@
 [![CI](https://github.com/apchavez/quarkus-react-fullstack-k8s/actions/workflows/ci.yml/badge.svg)](https://github.com/apchavez/quarkus-react-fullstack-k8s/actions/workflows/ci.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=apchavez_quarkus-react-fullstack-k8s&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=apchavez_quarkus-react-fullstack-k8s)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=apchavez_quarkus-react-fullstack-k8s&metric=coverage)](https://sonarcloud.io/summary/new_code?id=apchavez_quarkus-react-fullstack-k8s)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=apchavez_quarkus-react-fullstack-k8s&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=apchavez_quarkus-react-fullstack-k8s)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=quarkus-react-fullstack-k8s&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=quarkus-react-fullstack-k8s)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=quarkus-react-fullstack-k8s&metric=coverage)](https://sonarcloud.io/summary/new_code?id=quarkus-react-fullstack-k8s)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=quarkus-react-fullstack-k8s&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=quarkus-react-fullstack-k8s)
 
 # Product Management Platform
 
