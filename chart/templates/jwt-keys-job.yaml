@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "product-management.fullname" . }}-jwt-keys
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "product-management.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "product-management.fullname" . }}-jwt-keys
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "product-management.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "product-management.fullname" . }}-jwt-keys
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "product-management.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "product-management.fullname" . }}-jwt-keys
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "product-management.fullname" . }}-jwt-keys
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "product-management.fullname" . }}-jwt-keys
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "product-management.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "product-management.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "product-management.fullname" . }}-jwt-keys
+      containers:
+        - name: ensure-jwt-keys
+          image: alpine/k8s:1.31.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              SECRET_NAME="jwt-keys"
+              if kubectl get secret "$SECRET_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
+                echo "Secret $SECRET_NAME already exists, leaving it as-is (all replicas must share one key)."
+                exit 0
+              fi
+              apk add --no-cache openssl >/dev/null
+              echo "Generating a new RSA keypair for JWT signing/verification..."
+              openssl genrsa -out /tmp/privateKey.pem 2048
+              openssl rsa -in /tmp/privateKey.pem -pubout -out /tmp/publicKey.pem
+              kubectl create secret generic "$SECRET_NAME" -n "$NAMESPACE" \
+                --from-file=privateKey.pem=/tmp/privateKey.pem \
+                --from-file=publicKey.pem=/tmp/publicKey.pem
+              echo "Secret $SECRET_NAME created."
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
