@@ -23,9 +23,9 @@ variable "vpc_cidr" {
 }
 
 variable "node_instance_types" {
-  description = "Instance types for the EKS managed node group"
+  description = "Instance types for the EKS managed node group — must stay free-tier-eligible (verify with `aws ec2 describe-instance-types --filters Name=free-tier-eligible,Values=true`) since this account is on AWS's restrictive Free Plan, which hard-rejects launches of anything else"
   type        = list(string)
-  default     = ["t3.medium"]
+  default     = ["t3.small"]
 }
 
 variable "node_min_size" {
@@ -37,7 +37,7 @@ variable "node_min_size" {
 variable "node_max_size" {
   description = "Maximum number of nodes in the managed node group"
   type        = number
-  default     = 3
+  default     = 2
 }
 
 variable "node_desired_size" {

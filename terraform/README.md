@@ -8,7 +8,9 @@ Provisions the AWS infrastructure this project's Helm chart (`../chart/`) deploy
 
 ## ⚠️ Cost warning
 
-Running `terraform apply` here creates **real, billed AWS resources**: an EKS control plane (~$0.10/hr), 1–3 `t3.medium` nodes (~$0.04/hr each), one NAT gateway (~$0.045/hr + data), an internet-facing Network Load Balancer for `ingress-nginx`, and EBS gp3 volumes for `mongo`/`redis`. Roughly **$150–200/month** if left running continuously. Unlike the AWS Lambda and Azure Functions siblings in this portfolio (serverless, effectively zero cost at rest), this is always-on infrastructure. **Always `terraform destroy` when you're done evaluating it.**
+Running `terraform apply` here creates **real, billed AWS resources**: an EKS control plane (~$0.10/hr), 1–2 `t3.small` nodes (~$0.02/hr each), one NAT gateway (~$0.045/hr + data), an internet-facing Network Load Balancer for `ingress-nginx`, and EBS gp3 volumes for `mongo`/`redis`. Roughly **$130–170/month** if left running continuously. Unlike the AWS Lambda and Azure Functions siblings in this portfolio (serverless, effectively zero cost at rest), this is always-on infrastructure. **Always `terraform destroy` when you're done evaluating it.**
+
+> **Instance type note:** `node_instance_types` must stay free-tier-eligible (`t3.small`/`t3.micro`/`t4g.small`/etc — verify with `aws ec2 describe-instance-types --filters Name=free-tier-eligible,Values=true`). This AWS account is on AWS's restrictive Free Plan, which hard-rejects launching any EC2 instance type outside that list (`t3.medium` fails with `InvalidParameterCombination`, confirmed the hard way).
 
 ---
 
