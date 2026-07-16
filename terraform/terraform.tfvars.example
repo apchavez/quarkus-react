@@ -1,0 +1,20 @@
+# Copy to terraform.tfvars and adjust as needed.
+# terraform.tfvars is gitignored — never commit real values here.
+
+aws_region   = "us-east-1"
+cluster_name = "product-management"
+
+# Cost knobs — see terraform/README.md for an estimate before applying.
+# m7i-flex.large (not t3.medium): this AWS account is on the restrictive Free
+# Plan, which hard-rejects EC2 launches for any instance type not tagged
+# free-tier-eligible (verify with `aws ec2 describe-instance-types
+# --filters Name=free-tier-eligible,Values=true`) — confirmed the hard way
+# when a t3.medium node group failed with InvalidParameterCombination.
+# m7i-flex.large (2 vCPU/8GB) is the smallest free-tier-eligible type with
+# enough headroom for the full chart on one node — t3.small/t4g.small (2GB)
+# hit real "Insufficient memory" scheduling failures with everything deployed
+# (kafka+mongo+redis+2x api+2x web+ingress-nginx+cert-manager).
+node_instance_types = ["m7i-flex.large"]
+node_min_size       = 1
+node_max_size       = 1
+node_desired_size   = 1

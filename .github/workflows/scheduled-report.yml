@@ -1,0 +1,98 @@
+name: Scheduled Product Report
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # weekly, Monday 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-and-deliver:
+    name: Seed data, generate reports, deliver
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Start the stack
+        run: docker compose up -d --build
+
+      - name: Wait for the API to become healthy
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost/api/v1/q/health/live | grep -q '"status": "UP"'; then
+              echo "API is up."
+              exit 0
+            fi
+            echo "Waiting for API... ($i/30)"
+            sleep 5
+          done
+          echo "::error::API never became healthy"
+          docker compose logs
+          exit 1
+
+      - name: Log in as demo admin
+        id: login
+        run: |
+          TOKEN=$(curl -sf -X POST http://localhost/api/v1/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"username":"admin","password":"admin123"}' | \
+            node -e "process.stdout.write(JSON.parse(require('fs').readFileSync(0,'utf-8')).token)")
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Seed sample products via CSV import
+        env:
+          TOKEN: ${{ steps.login.outputs.token }}
+        run: |
+          cat > /tmp/sample-products.csv <<'EOF'
+          sku,name,description,category,price,stock,active
+          RPT-001,Auricular inalámbrico,Auriculares Bluetooth con cancelación de ruido,Electrónica,89.99,120,true
+          RPT-002,Teclado mecánico,Teclado mecánico retroiluminado RGB,Electrónica,64.50,75,true
+          RPT-003,Silla ergonómica,Silla de oficina con soporte lumbar,Muebles,210.00,30,true
+          RPT-004,Monitor 27 pulgadas,Monitor IPS 4K 27 pulgadas,Electrónica,329.99,18,true
+          RPT-005,Botella térmica,Botella de acero inoxidable 750ml,Hogar,15.75,300,true
+          RPT-006,Escritorio ajustable,Escritorio eléctrico de altura ajustable,Muebles,450.00,12,false
+          RPT-007,Mochila urbana,Mochila resistente al agua con puerto USB,Accesorios,45.20,90,true
+          EOF
+          curl -sf -X POST http://localhost/api/v1/products/import \
+            -H "Authorization: Bearer $TOKEN" \
+            -F "file=@/tmp/sample-products.csv;type=text/csv"
+
+      - name: Download PDF and Excel reports
+        env:
+          TOKEN: ${{ steps.login.outputs.token }}
+        run: |
+          curl -sf http://localhost/api/v1/products/report/pdf \
+            -H "Authorization: Bearer $TOKEN" -o products-report.pdf
+          curl -sf http://localhost/api/v1/products/report/excel \
+            -H "Authorization: Bearer $TOKEN" -o products-report.xlsx
+          ls -lh products-report.pdf products-report.xlsx
+
+      - name: Upload reports as workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-reports-${{ github.run_id }}
+          path: |
+            products-report.pdf
+            products-report.xlsx
+          retention-days: 30
+
+      - name: Email reports (optional)
+        if: ${{ vars.REPORT_EMAIL != '' && vars.SMTP_SERVER != '' }}
+        uses: dawidd6/action-send-mail@v6
+        with:
+          server_address: ${{ vars.SMTP_SERVER }}
+          server_port: ${{ vars.SMTP_PORT || '587' }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Reporte semanal de productos — quarkus-react"
+          to: ${{ vars.REPORT_EMAIL }}
+          from: "quarkus-react Scheduled Report"
+          body: "Reporte semanal generado automáticamente a partir de datos de muestra sembrados por este mismo workflow. Adjuntos: PDF y Excel."
+          attachments: products-report.pdf,products-report.xlsx
+
+      - name: Tear down the stack
+        if: always()
+        run: docker compose down -v
