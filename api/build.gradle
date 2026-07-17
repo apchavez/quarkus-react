@@ -29,7 +29,7 @@ configurations.all {
 
 dependencies {
     /* Quarkus BOM */
-    implementation platform('io.quarkus.platform:quarkus-bom:3.37.1')
+    implementation platform('io.quarkus.platform:quarkus-bom:3.37.3')
 
     /* Quarkus extensions */
     implementation 'io.quarkus:quarkus-arc'
