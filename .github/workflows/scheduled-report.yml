@@ -38,7 +38,7 @@ jobs:
           TOKEN=$(curl -sf -X POST http://localhost/api/v1/auth/login \
             -H "Content-Type: application/json" \
             -d '{"username":"admin","password":"admin123"}' | \
-            node -e "process.stdout.write(JSON.parse(require('fs').readFileSync(0,'utf-8')).token)")
+            node -e "process.stdout.write(JSON.parse(require('fs').readFileSync(0,'utf-8')).data.token)")
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
 
