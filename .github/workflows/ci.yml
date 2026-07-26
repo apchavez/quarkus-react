@@ -59,6 +59,10 @@ jobs:
         working-directory: web
         run: pnpm exec tsc --noEmit
 
+      - name: Lint
+        working-directory: web
+        run: pnpm lint
+
       - name: Test and coverage
         working-directory: web
         run: pnpm test:coverage

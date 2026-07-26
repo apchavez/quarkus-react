@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { apiFetch, UnauthorizedError } from '../httpClient';
-import { setAuth, clearAuth, getToken } from '../../auth/tokenStorage';
+import { setAuth, getToken } from '../../auth/tokenStorage';
 
 const mockFetch = vi.fn();
 
