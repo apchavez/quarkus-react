@@ -102,6 +102,37 @@ jobs:
           path: web/playwright-report/
           retention-days: 30
 
+  gateway-smoke-test:
+    name: Docker Compose — gateway routing smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Start the stack
+        run: docker compose up -d --build
+
+      # Catches regressions in the nginx gateway (docker/gateway.conf) on every push,
+      # not just on the weekly scheduled-report.yml cron — a nginx/Alpine DNS-resolution
+      # race here once crash-looped the gateway silently for days before anyone noticed.
+      - name: Wait for the API to become healthy through the gateway
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost/api/v1/q/health/live | grep -q '"status": "UP"'; then
+              echo "Gateway routing to product-api is healthy."
+              exit 0
+            fi
+            echo "Waiting for API through gateway... ($i/30)"
+            sleep 5
+          done
+          echo "::error::Gateway never routed to a healthy API"
+          docker compose logs
+          exit 1
+
+      - name: Tear down the stack
+        if: always()
+        run: docker compose down -v
+
   docker-api:
     name: Docker — API
     runs-on: ubuntu-latest
