@@ -1,0 +1,124 @@
+﻿# =====================================
+# ROOT FULLSTACK PROJECT
+# product-management
+# =====================================
+
+# =====================================
+# ENV FILES
+# =====================================
+.env
+.env.*
+!.env.example
+
+api/.env
+api/.env.*
+!api/.env.example
+
+web/.env
+web/.env.*
+!web/.env.example
+
+# =====================================
+# BACKEND - JAVA / GRADLE / QUARKUS
+# =====================================
+api/.gradle/
+api/build/
+api/bin/
+api/target/
+api/out/
+api/.quarkus/
+
+# Keep wrapper jar
+!api/gradle/wrapper/gradle-wrapper.jar
+
+# Java compiled
+*.class
+*.jar
+*.war
+
+# =====================================
+# FRONTEND - NODE / VITE / PNPM
+# =====================================
+web/node_modules/
+web/dist/
+web/build/
+web/.vite/
+web/test-results/
+web/playwright-report/
+
+# pnpm/npm logs
+pnpm-debug.log*
+npm-debug.log*
+yarn-error.log*
+
+# =====================================
+# LOGS
+# =====================================
+*.log
+
+# =====================================
+# IDES
+# =====================================
+
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+
+# NetBeans
+**/nb-cache/
+**/.nb-gradle/
+nbproject/private/
+nbdist/
+
+# VSCode
+.vscode/
+!.vscode/settings.json
+
+# =====================================
+# SYSTEM FILES
+# =====================================
+.DS_Store
+Thumbs.db
+
+# =====================================
+# TEMP
+# =====================================
+*.tmp
+*.temp
+*.ser
+coverage/
+tmp/
+temp/
+
+# =====================================
+# MEDIA LARGE FILES (optional)
+# =====================================
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.tiff
+
+# Docker / Kubernetes local artifacts
+# chart/ (Helm) is the source of truth for what's deployed — see README.md.
+*.tar
+api/product-api.yaml
+api/product-api/
+
+# =====================================
+# TERRAFORM
+# =====================================
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/terraform.tfvars
+terraform/*.tfplan
+terraform/crash.log
+terraform/crash.*.log
