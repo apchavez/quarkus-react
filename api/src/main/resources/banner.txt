@@ -1,0 +1,10 @@
+================================================================================
+   Product Management API
+
+   App Name        : ${quarkus.application.name}
+   Version         : ${quarkus.application.version}
+   Environment     : ${app.environment:local}
+   Quarkus Version : ${quarkus.version}
+
+   Status          : Starting application...
+================================================================================

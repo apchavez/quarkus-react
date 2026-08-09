@@ -1,0 +1,77 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Ephemeral kind cluster — deploy & smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: product-management
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5
+
+      - name: Render manifests (excluding cert-manager/ingress-controller resources)
+        run: |
+          helm template product-management ./chart \
+            --namespace product-management \
+            --set monitoring.enabled=false \
+            --set secrets.mongoUsername=smoke-user \
+            --set secrets.mongoPassword=smoke-pass \
+            --set "secrets.mongoConnectionString=mongodb://smoke-user:smoke-pass@mongo-service:27017" \
+            --set secrets.kafkaUser=smoke-user \
+            --set secrets.kafkaPassword=smoke-pass \
+            > rendered.yaml
+          awk 'BEGIN{RS="\n---\n"; ORS="\n---\n"} !/kind: ClusterIssuer/ && !/kind: Ingress/' rendered.yaml > filtered.yaml
+
+      - name: Apply RBAC + JWT keys job first (Helm pre-install hooks, run as plain resources here)
+        run: |
+          kubectl create namespace product-management --dry-run=client -o yaml | kubectl apply -f -
+          awk 'BEGIN{RS="\n---\n"; ORS="\n---\n"} /kind: ServiceAccount|kind: Role|kind: RoleBinding|kind: Job/' filtered.yaml > jwt-keys-bootstrap.yaml
+          kubectl apply -f jwt-keys-bootstrap.yaml -n product-management
+          kubectl wait --for=condition=complete job -l app.kubernetes.io/name=product-management -n product-management --timeout=60s || true
+
+      - name: Apply remaining manifests
+        run: kubectl apply -f filtered.yaml -n product-management
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/mongo -n product-management --timeout=180s
+          kubectl rollout status deployment/kafka -n product-management --timeout=180s
+          kubectl rollout status deployment/product-api -n product-management --timeout=180s
+          kubectl rollout status deployment/product-web -n product-management --timeout=120s
+
+      - name: Smoke test — health endpoint
+        run: |
+          kubectl port-forward -n product-management svc/product-api 8080:8080 &
+          PF_PID=$!
+          sleep 5
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/api/v1/q/health/ready)
+          kill $PF_PID
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check failed with status $STATUS"
+            exit 1
+          fi
+          echo "Health check OK ($STATUS)"
+
+      - name: Dump pod status on failure
+        if: failure()
+        run: |
+          kubectl get pods -n product-management
+          kubectl describe pods -n product-management
+          kubectl logs -n product-management -l app=product-api --tail=100 || true
+
+      - name: Destroy kind cluster
+        if: always()
+        run: kind delete cluster --name product-management
