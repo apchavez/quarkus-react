@@ -67,7 +67,7 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.27.7'
     testImplementation 'io.quarkus:quarkus-jacoco'
     testImplementation 'org.testcontainers:testcontainers-mongodb'
-    testImplementation 'nl.jqno.equalsverifier:equalsverifier:4.5'
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:4.5.2'
     testImplementation 'io.smallrye.reactive:smallrye-reactive-messaging-in-memory'
 }
 
