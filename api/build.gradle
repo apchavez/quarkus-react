@@ -1,0 +1,117 @@
+plugins {
+    id 'java'
+    id 'io.quarkus' version '3.37.1'
+    id 'jacoco'
+    id 'org.sonarqube' version '7.3.1.8318'
+}
+
+group = 'com.products'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenLocal() {
+        content {
+            includeGroup 'com.products'
+        }
+    }
+    mavenCentral()
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+dependencies {
+    /* Quarkus BOM */
+    implementation platform('io.quarkus.platform:quarkus-bom:3.37.1')
+
+    /* Quarkus extensions */
+    implementation 'io.quarkus:quarkus-arc'
+    implementation 'io.quarkus:quarkus-rest-jackson'
+    implementation 'io.quarkus:quarkus-mongodb-panache'
+    implementation 'io.quarkus:quarkus-redis-client'
+    implementation 'io.quarkus:quarkus-hibernate-validator'
+    implementation 'io.quarkus:quarkus-smallrye-health'
+    implementation 'io.quarkus:quarkus-smallrye-openapi'
+    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+    implementation 'io.quarkus:quarkus-opentelemetry'
+    implementation 'io.quarkus:quarkus-smallrye-jwt'
+    implementation 'io.quarkus:quarkus-smallrye-jwt-build'
+    implementation 'io.quarkus:quarkus-elytron-security-common'
+    implementation 'io.quarkus:quarkus-logging-json'
+    implementation 'io.quarkus:quarkus-messaging-kafka'
+
+    /* MapStruct */
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    /* Reporting: CSV import, PDF/Excel export */
+    implementation 'org.apache.commons:commons-csv:1.14.1'
+    implementation 'org.apache.pdfbox:pdfbox:3.0.7'
+    implementation 'org.apache.poi:poi-ooxml:5.5.1'
+
+    /* Lombok */
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    /* Test */
+    testImplementation 'io.quarkus:quarkus-junit5'
+    testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'io.quarkus:quarkus-junit5-mockito'
+    testImplementation 'org.assertj:assertj-core:3.27.7'
+    testImplementation 'io.quarkus:quarkus-jacoco'
+    testImplementation 'org.testcontainers:testcontainers-mongodb'
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:4.5'
+    testImplementation 'io.smallrye.reactive:smallrye-reactive-messaging-in-memory'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty 'java.util.logging.manager', 'org.jboss.logmanager.LogManager'
+    finalizedBy tasks.named('jacocoTestReport')
+}
+
+jacoco {
+    toolVersion = '0.8.11'
+}
+
+tasks.named('jacocoTestReport') {
+    dependsOn tasks.named('test')
+    // Quarkus's own jacoco extension (needed to capture coverage for classes
+    // exercised through @QuarkusTest, which run in Quarkus's own augmented
+    // classloader and are invisible to the plain Gradle/JVM jacoco agent)
+    // writes its execution data to build/jacoco-quarkus.exec, separate from
+    // the standard build/jacoco/test.exec. Without merging both files here,
+    // the XML report (and therefore Sonar) silently reports 0% coverage for
+    // every class only ever touched inside a @QuarkusTest.
+    executionData fileTree(layout.buildDirectory).include('jacoco/test.exec', 'jacoco-quarkus.exec')
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+}
+
+tasks.named('jacocoTestCoverageVerification') {
+    dependsOn tasks.named('jacocoTestReport')
+    executionData fileTree(layout.buildDirectory).include('jacoco/test.exec', 'jacoco-quarkus.exec')
+    violationRules {
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'LINE'
+                value   = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+        }
+    }
+}
+
+/* Enable Quarkus native build support (configured via properties) */
+// Native arguments are already defined in application.properties
